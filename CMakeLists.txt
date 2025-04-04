@@ -62,15 +62,3 @@ install(TARGETS smartwin_devices
     ARCHIVE DESTINATION lib
 )
 
-set(HEADER_FILES
-    include/smartwin_devices.h
-    include/smartwin_comm.h
-    include/future_cmd.h
-    include/future_def.h
-)
-
-set(SOURCE_FILES
-    src/smartwin_devices.cpp
-    src/smartwin_comm.cpp
-)
-
