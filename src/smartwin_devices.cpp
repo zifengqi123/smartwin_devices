@@ -471,14 +471,29 @@ int smartwin_devices::tp_get_touch_coordinate(uint32_t &x, uint32_t &y) {
 
     int ret = SDK_ERROR;
     if(tpinput_list.size() > 0) {
-        std::vector<uint8_t> buf = tpinput_list[0];
+        std::vector<uint8_t> buf = tpinput_list[tpinput_list.size() - 1];
 
         pthread_mutex_lock(&tpinput_list_mutex_);
-        tpinput_list.erase(tpinput_list.begin());
+        tpinput_list.clear();
         pthread_mutex_unlock(&tpinput_list_mutex_);
 
         x = buf[4] * 256 + buf[5];
         y = buf[6] * 256 + buf[7];
+
+        y = 239 - y;        //将触摸原点从左下角调整为左上角
+
+        if(y < 0) {
+            y = 0;
+        }
+        if(y > 239) {
+            y = 239;
+        }
+        if(x < 0) {
+            x = 0;
+        }
+        if(x > 319) {
+            x = 319;
+        }
         ret = SDK_OK;
     }
 

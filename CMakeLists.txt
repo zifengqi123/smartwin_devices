@@ -39,16 +39,12 @@ add_library(smartwin_devices SHARED
     ${PROJECT_SOURCE_DIR}/src/serial/unix.cpp
 )
 
-add_executable(future_test 
-    test/future_test.cpp
+add_executable(smartwin_test 
+    test/smartwin_test.cpp
 )
 
-target_link_libraries(future_test 
+target_link_libraries(smartwin_test 
     smartwin_devices
-)
-
-target_link_libraries(future_test 
-    smartwin_devices 
     pthread 
 )
 
