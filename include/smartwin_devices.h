@@ -358,14 +358,13 @@ public:
 
     /**
      * @brief IC卡发送APDU命令 (命令字: 0x4F)
-     * @param[in] card_type 卡类型 @see SDK_CARD_TYPE_CPU, SDK_CARD_TYPE_AT24CXX, SDK_CARD_TYPE_MEMORY
      * @param[in] card_seat 卡座号 @see SDK_CARD_SEAT_STANDARD, SDK_CARD_SEAT_SAM1, SDK_CARD_SEAT_SAM2, SDK_CARD_SEAT_SAM3
      * @param[in] apdu_command APDU命令数据
      * @param[out] card_return_data 卡片返回数据
      * @return 成功返回SDK_OK，失败返回错误码
      */
-    int ic_card_send_apdu_command(uint8_t card_type, uint8_t card_seat, 
-        std::vector<uint8_t> apdu_command, std::vector<uint8_t> card_return_data);
+    int ic_card_send_apdu_command(uint8_t card_seat, 
+        std::vector<uint8_t> apdu_command, std::vector<uint8_t>& card_return_data);
 
     /**
      * @brief 打开非接模块 (命令字: 0x50)
@@ -398,7 +397,7 @@ public:
      * @return 成功返回SDK_OK，失败返回错误码
      * 卡片返回数据
      */
-    int icc_send_apdu_command(std::vector<uint8_t> apdu_command, std::vector<uint8_t> card_return_data);
+    int icc_send_apdu_command(std::vector<uint8_t> apdu_command, std::vector<uint8_t>& card_return_data);
 
     /**
      * @brief Mifare卡认证 (命令字: 0x54)

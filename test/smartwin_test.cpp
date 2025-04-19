@@ -17,6 +17,17 @@ std::string vect2str(std::vector<uint8_t> buf) {
     return str;
 }
 
+std::vector<uint8_t> str2vect(std::string str) {
+    std::vector<uint8_t> buf;
+    for(int i = 0; i < str.size(); i += 2) {
+        char tmp[3] = {0};
+        tmp[0] = str[i];
+        tmp[1] = str[i+1];
+        buf.push_back((uint8_t)strtol(tmp, NULL, 16));
+    }
+    return buf;
+}
+
 void test_communication_mode()
 {
     int ret = _devices->set_communication_mode(0);
@@ -38,37 +49,74 @@ void test_communication_mode()
 void test_version()
 {
     std::vector<uint8_t> version;
-    int ret = _devices->get_system_version(0x00, version);
+    int ret = 0;
+    // ret =_devices->get_system_version(SDK_VERSION_TYPE_HARDWARE, version);
+    // if (ret != 0) {
+    //     printf("ERROR: get_system_version ret: %d\n", ret);
+    //     return;
+    // }
+    // printf("get_system_version ret: %d, 硬件(内部版本号): %s\n", ret, std::string(version.begin(), version.end()).c_str());
+
+    // ret = _devices->get_system_version(SDK_VERSION_TYPE_BOOT, version);
+    // if (ret != 0) {
+    //     printf("ERROR: get_system_version ret: %d\n", ret);
+    //     return;
+    // }
+    // printf("get_system_version ret: %d, Boot 版本号: %s\n", ret, std::string(version.begin(), version.end()).c_str());
+
+    // ret = _devices->get_system_version(SDK_VERSION_TYPE_KERNEL, version);
+    // if (ret != 0) {
+    //     printf("ERROR: get_system_version ret: %d\n", ret);
+    //     return;
+    // }
+    // printf("get_system_version ret: %d, 内核版本号: %s\n", ret, std::string(version.begin(), version.end()).c_str());
+
+    ret = _devices->get_system_version(SDK_VERSION_TYPE_SYSTEM, version);
     if (ret != 0) {
         printf("ERROR: get_system_version ret: %d\n", ret);
         return;
     }
-    printf("get_system_version ret: %d, version: %s\n", ret, version.data());
+    printf("get_system_version ret: %d, 系统版本号: %s\n", ret, std::string(version.begin(), version.end()).c_str());
 
-    std::vector<uint8_t> serial_number = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30};
-    std::vector<uint8_t> custom_serial_number = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x31};
-    ret = _devices->set_terminal_serial_number(serial_number, custom_serial_number);
-    if (ret != 0) {
-        printf("ERROR: set_terminal_serial_number ret: %d\n", ret);
-        return;
-    }
-    printf("set_terminal_serial_number ret: %d\n", ret);
+    // ret = _devices->get_system_version(SDK_VERSION_TYPE_LIBRARY, version);
+    // if (ret != 0) {
+    //     printf("ERROR: get_system_version ret: %d\n", ret);
+    //     return;
+    // }
+    // printf("get_system_version ret: %d, 底层库版本: %s\n", ret, std::string(version.begin(), version.end()).c_str());
 
-    sleep(3);
+    // ret = _devices->get_system_version(SDK_VERSION_TYPE_SDK, version);
+    // if (ret != 0) {
+    //     printf("ERROR: get_system_version ret: %d\n", ret);
+    //     return;
+    // }
+    // printf("get_system_version ret: %d, SDK 版本号: %s\n", ret, std::string(version.begin(), version.end()).c_str());
 
-    ret = _devices->get_hardware_serial_number(version);
-    if (ret != 0) {
-        printf("ERROR: get_hardware_serial_number ret: %d\n", ret);
-        return;
-    }
-    printf("get_hardware_serial_number ret: %d, serial_number: %s\n", ret, version.data());
 
-    ret = _devices->get_customer_serial_number(version);
-    if (ret != 0) {
-        printf("ERROR: get_customer_serial_number ret: %d\n", ret);
-        return;
-    }
-    printf("get_customer_serial_number ret: %d, customer_serial_number: %s\n", ret, vect2str(version).c_str());
+    // std::vector<uint8_t> serial_number = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30};
+    // std::vector<uint8_t> custom_serial_number = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x31};
+    // ret = _devices->set_terminal_serial_number(serial_number, custom_serial_number);
+    // if (ret != 0) {
+    //     printf("ERROR: set_terminal_serial_number ret: %d\n", ret);
+    //     return;
+    // }
+    // printf("set_terminal_serial_number ret: %d\n", ret);
+
+    // sleep(3);
+
+    // ret = _devices->get_hardware_serial_number(version);
+    // if (ret != 0) {
+    //     printf("ERROR: get_hardware_serial_number ret: %d\n", ret);
+    //     return;
+    // }
+    // printf("get_hardware_serial_number ret: %d, serial_number: %s\n", ret, std::string(version.begin(), version.end()).c_str());
+
+    // ret = _devices->get_customer_serial_number(version);
+    // if (ret != 0) {
+    //     printf("ERROR: get_customer_serial_number ret: %d\n", ret);
+    //     return;
+    // }
+    // printf("get_customer_serial_number ret: %d, customer_serial_number: %s\n", ret, std::string(version.begin(), version.end()).c_str());
 
     uint8_t model = 0;
     ret = _devices->get_device_model(model);
@@ -83,7 +131,7 @@ void test_version()
         printf("ERROR: get_chip_serial_number ret: %d\n", ret);
         return;
     }
-    printf("get_chip_serial_number ret: %d, chip_serial_number: %s\n", ret, vect2str(version).c_str());
+    printf("get_chip_serial_number ret: %d, chip_serial_number: %s\n", ret, std::string(version.begin(), version.end()).c_str());
 }
 
 
@@ -97,7 +145,7 @@ void test_clock()
     }
     printf("set_clock ret: %d\n", ret);
 
-    sleep(3);
+    sleep(1);
 
     ret = _devices->get_clock(time);
     if (ret != 0) {
@@ -115,7 +163,6 @@ void test_beep()
         return;
     }
     printf("beep ret: %d\n", ret);
-    sleep(3);
 
     ret = _devices->beep_frequency(1000, 1000);
     if (ret != 0) {
@@ -123,7 +170,6 @@ void test_beep()
         return;
     }
     printf("beep_frequency ret: %d\n", ret);
-    sleep(3);
 
     ret = _devices->beep(SDK_BEEP_NORMAL);
     if (ret != 0) {
@@ -142,21 +188,21 @@ void test_led()
         return;
     }
     printf("led_on ret: %d\n", ret);
-    sleep(10);
+    sleep(1);
     ret = _devices->led_off(0x0F);
     if (ret != 0) {
         printf("ERROR: led_off ret: %d\n", ret);
         return;
     }
     printf("led_off ret: %d\n", ret);
-    sleep(10);
+    sleep(1);
     ret = _devices->led_flash(0x0F, 1000);
     if (ret != 0) {
         printf("ERROR: led_flash ret: %d\n", ret);
         return;
     }
     printf("led_flash ret: %d\n", ret);
-    sleep(10);
+    sleep(1);
     ret = _devices->led_off(0x0F);
     if (ret != 0) {
         printf("ERROR: led_off ret: %d\n", ret);
@@ -227,7 +273,7 @@ void test_keyboard()
     }
     printf("keyboard_set_backlight ret: %d\n", ret);
 
-    sleep(30);
+    sleep(1);
 
     ret = _devices->keyboard_clear_cache();
     if (ret != 0) {
@@ -292,7 +338,7 @@ void test_tp()
     }
     printf("tp_open ret: %d\n", ret);
 
-    sleep(3);
+    sleep(1);
     uint32_t x = 0;
     uint32_t y = 0;
     int cnt = 100;
@@ -313,7 +359,6 @@ void test_tp()
     }
     printf("tp_close ret: %d\n", ret);
 
-    sleep(3);
 }
 
 
@@ -333,7 +378,21 @@ void test_magnetic_stripe_card()
     }
     printf("magnetic_stripe_card_clear_data ret: %d\n", ret);
 
-    sleep(3);
+    int cnt = 1000;
+    while (cnt > 0)
+    {
+        ret = _devices->magnetic_stripe_card_check();
+        if (ret == 0) {
+            printf("ERROR: magnetic_stripe_card_check ret: %d\n", ret);
+            break;
+        }
+        usleep(1000);
+        cnt--;
+    }
+    if (cnt <= 0) {
+        printf("ERROR: magnetic_stripe_card_check timeout\n");
+        return;
+    }
 
     std::vector<uint8_t> tk1;
     std::vector<uint8_t> tk2;
@@ -344,9 +403,9 @@ void test_magnetic_stripe_card()
         return;
     }
     printf("magnetic_stripe_card_read_data ret: %d\n", ret);
-    printf("tk1: %s\n", vect2str(tk1).c_str());
-    printf("tk2: %s\n", vect2str(tk2).c_str());
-    printf("tk3: %s\n", vect2str(tk3).c_str());
+    printf("tk1: ln: %d, %s\n", tk1.size(), std::string(tk1.begin(), tk1.end()).c_str());
+    printf("tk2: ln: %d, %s\n", tk2.size(), std::string(tk2.begin(), tk2.end()).c_str());
+    printf("tk3: ln: %d, %s\n", tk3.size(), std::string(tk3.begin(), tk3.end()).c_str());
 
     std::vector<uint8_t> card_number;
     std::vector<uint8_t> valid_date;
@@ -358,13 +417,11 @@ void test_magnetic_stripe_card()
         return;
     }
     printf("magnetic_stripe_card_format_data ret: %d\n", ret);
-    printf("card_number: %s\n", card_number.data());
-    printf("valid_date: %s\n", valid_date.data());
-    printf("card_holder_name: %s\n", card_holder_name.data());
-    printf("service_code: %s\n", service_code.data());
+    printf("card_number: ln: %d, %s\n", card_number.size(), std::string(card_number.begin(), card_number.end()).c_str());
+    printf("valid_date: ln: %d, %s\n", valid_date.size(), std::string(valid_date.begin(), valid_date.end()).c_str());
+    printf("card_holder_name: ln: %d, %s\n", card_holder_name.size(), std::string(card_holder_name.begin(), card_holder_name.end()).c_str());
+    printf("service_code: ln: %d, %s\n", service_code.size(), std::string(service_code.begin(), service_code.end()).c_str());
 
-
-    sleep(3);
 
     ret = _devices->magnetic_stripe_card_close();
     if (ret != 0) {
@@ -403,22 +460,30 @@ void test_ic()
     printf("ic_card_reset ret: %d\n", ret);
     printf("data: %s\n", vect2str(data).c_str());
 
-    std::vector<uint8_t> apdu_command = {0x00, 0xB0, 0x00, 0x00, 0x02, 0x10, 0x00};
+    ret = _devices->ic_card_check_status(0, 0);
+    if (ret != 0) {
+        printf("ic_card_check_status ret: %d\n", ret);
+        return;
+    } 
+
+    char * sapdu = "00A404000E315041592E5359532E444446303100";
+
+    std::vector<uint8_t> apdu_command = str2vect(sapdu);
     std::vector<uint8_t> card_return_data;
-    ret = _devices->ic_card_send_apdu_command(0, 0, apdu_command, card_return_data);
+    ret = _devices->ic_card_send_apdu_command(SDK_CARD_SEAT_STANDARD, apdu_command, card_return_data);
     if (ret != 0) {
         printf("ERROR: ic_card_send_apdu_command ret: %d\n", ret);
         return;
     }
-    printf("ic_card_send_apdu_command ret: %d\n", ret);
+    printf("ic_card_send_apdu_command %s ret: %d\n", sapdu, ret);
     printf("card_return_data: %s\n", vect2str(card_return_data).c_str());
 
     ret = _devices->ic_card_power_off(0, 0);
     if (ret != 0) {
-        printf("ERROR: ic_card_module_power_off ret: %d\n", ret);
+        printf("ERROR: ic_card_power_off ret: %d\n", ret);
         return;
     }
-    printf("ic_card_module_power_off ret: %d\n", ret);
+    printf("ic_card_power_off ret: %d\n", ret);
 
     
 }
@@ -436,21 +501,34 @@ void test_icc()
     std::vector<uint8_t> serial_number;
     std::vector<uint8_t> cid;
     std::vector<uint8_t> card_response_info;
-    ret = _devices->icc_search_card_activation(0, card_type, serial_number, cid, card_response_info);
-    if (ret != 0) {
-        printf("ERROR: icc_search_card_activation ret: %d\n", ret);
+
+    int cnt = 1000;
+    while (cnt > 0) {
+        ret = _devices->icc_search_card_activation(SDK_ICC_TYPE_A, card_type, serial_number, cid, card_response_info);
+        if (ret == 0) {
+            printf("icc_search_card_activation ret: %d\n", ret);
+            break;
+        }
+        usleep(1000);
+        cnt--;
+    }
+    
+    if (cnt <= 0) {
+        printf("ERROR: icc_search_card_activation timeout\n");
         return;
     }
-    printf("icc_search_card_activation ret: %d\n", ret);
 
-    std::vector<uint8_t> apdu_command = {0x00, 0xB0, 0x00, 0x00, 0x02, 0x10, 0x00};
+    char * sapdu = "00A404000E325041592E5359532E444446303100";
+
+    std::vector<uint8_t> apdu_command = str2vect(sapdu);
+
     std::vector<uint8_t> card_return_data;
     ret = _devices->icc_send_apdu_command(apdu_command, card_return_data);
     if (ret != 0) {
         printf("ERROR: icc_send_apdu_command ret: %d\n", ret);
         return;
     }
-    printf("icc_send_apdu_command ret: %d\n", ret);
+    printf("icc_send_apdu_command %s ret: %d\n", sapdu, ret);
     printf("card_return_data: %s\n", vect2str(card_return_data).c_str());
     ret = _devices->icc_close_module();
     if (ret != 0) {
@@ -570,6 +648,14 @@ void test_printer()
     }
     printf("printer_open ret: %d\n", ret);
 
+    ret = _devices->printer_query_status();
+
+    if (ret != 0) {
+        printf("ERROR: printer_query_status ret: %d\n", ret);
+        return;
+    }
+    printf("printer_query_status ret: %d\n", ret);
+
     ret = _devices->printer_set_gray(60);
     if (ret != 0) {
         printf("ERROR: printer_set_gray ret: %d\n", ret);
@@ -647,79 +733,62 @@ int main()
     while (true) {
         printf("+---------------------------------------------------+\n");
         printf("| 请选择测试项：[0. 退出]\n");
-        printf("| 1. test_communication_mode      2. test_version\n");
-        printf("| 3. test_clock                   4. test_beep\n");
-        printf("| 5. test_led                     6. test_system_reset\n");
-        printf("| 7. test_system_shutdown         8. test_set_enable_sleep_mode\n");
-        printf("| 9. test_get_enter_boot_state   10. test_keyboard\n");
-        printf("|11. test_tp                     12. test_magnetic_stripe_card\n");
-        printf("|13. test_ic                     14. test_icc\n");
-        printf("|15. test_mifare_card            16. test_search_card\n");
-        printf("|17. test_scan                   18. test_printer\n");
-        printf("|19. test_keypad\n");
+        printf("| 1. test_version                   2. test_beep\n");
+        printf("| 3. test_keyboard                  4. test_magnetic_stripe_card\n");
+        printf("| 5. test_ic                        6. test_icc\n");
+        printf("| 7. test_mifare_card               8. test_search_card\n");
+        printf("| 9. test_scan                     10. test_printer\n");
+        printf("|11. test_keypad                   12. test_tp\n");
         printf("+---------------------------------------------------+\n");
 
-        printf("请输入测试项[0-19]: ");
+        printf("请输入测试项[0-11]: ");
         scanf("%d", &choice);
 
         switch (choice)
         {
             case 1:
-                test_communication_mode();
+                // test_communication_mode();
+                test_version();
+                // test_clock();
                 break;
             case 2:
-                test_version();
+                test_beep();
+                test_led();
+                
+                // test_system_reset();
+                // test_system_shutdown();
+                // test_set_enable_sleep_mode();
+                // test_get_enter_boot_state();
                 break;
             case 3:
-                test_clock();
-                break;
-            case 4:
-                test_beep();
-                break;
-            case 5:
-                test_led();
-                break;
-            case 6:
-                test_system_reset();
-                break;
-            case 7:
-                test_system_shutdown();
-                break;
-            case 8:
-                test_set_enable_sleep_mode();
-                break;
-            case 9:
-                test_get_enter_boot_state();
-                break;
-            case 10:
                 test_keyboard();
                 break;
-            case 11:
-                test_tp();
-                break;
-            case 12:
+            case 4:
                 test_magnetic_stripe_card();
                 break;
-            case 13:
+            case 5:
                 test_ic();
                 break;
-            case 14:
+            case 6:
                 test_icc();
                 break;
-            case 15:
+            case 7:
                 test_mifare_card();
                 break;
-            case 16:
+            case 8:
                 test_search_card();
                 break;
-            case 17:
+            case 9:
                 test_scan();
                 break;
-            case 18:
+            case 10:
                 test_printer();
                 break;
-            case 19:
+            case 11:
                 test_keypad();
+                break;
+            case 12:
+                test_tp();
                 break;
             case 0:
                 return 0;

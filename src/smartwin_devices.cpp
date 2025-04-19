@@ -23,7 +23,7 @@ smartwin_devices::smartwin_devices() {
                 keyinput_list.push_back(buf);
                 pthread_mutex_unlock(&keyinput_list_mutex_);
             }
-            else if (CMD_SEARCH_CARD_START == buf[0] && CMD_SEARCH_CARD_RESULT == buf[1]) {
+            else if (CMD_SEARCH_CARD_START == buf[0] && 0x4F == buf[1]) {
                 pthread_mutex_lock(&search_card_list_mutex_);
                 search_card_list.push_back(buf);
                 pthread_mutex_unlock(&search_card_list_mutex_);
@@ -120,12 +120,28 @@ int smartwin_devices::recv_from_list(int8_t cmd, std::vector<uint8_t> &buf){
 }
 
 std::vector<uint8_t> smartwin_devices::lvar_to_vector(std::vector<uint8_t> buf) {
+    if (buf.size() < 1)
+    {
+        return std::vector<uint8_t>();
+    }   
+
     int ln = buf[0];
+    if (buf.size() < 1 + ln) {
+        return std::vector<uint8_t>();
+    }
     return std::vector<uint8_t>(buf.begin() + 1, buf.begin() + 1 + ln);
 }
 
 std::vector<uint8_t> smartwin_devices::llvar_to_vector(std::vector<uint8_t> buf) {
+    if (buf.size() < 2)
+    {
+        return std::vector<uint8_t>();
+    }
+    
     int ln = buf[0] * 256 + buf[1];
+    if (buf.size() < 2 + ln) {
+        return std::vector<uint8_t>();
+    }
     return std::vector<uint8_t>(buf.begin() + 2, buf.begin() + 2 + ln);
 }
 
@@ -442,7 +458,6 @@ int smartwin_devices::tp_open() {
 }
 
 int smartwin_devices::tp_close() {
-    send_request_cmd(CMD_OPEN_TP, {SDK_TP_REPORT_NO});
 
     send_request_cmd(CMD_CLOSE_TP, {});
 
@@ -657,10 +672,10 @@ int smartwin_devices::ic_card_check_status(uint8_t card_type, uint8_t card_seat)
     int timeout = recv_timeout;
     while(timeout > 0) {
         if (icstatus_list.size() > 0) {
-            std::vector<uint8_t> buf = icstatus_list[0];
+            std::vector<uint8_t> buf = icstatus_list[icstatus_list.size() - 1];
 
             pthread_mutex_lock(&icstatus_list_mutex_);
-            icstatus_list.erase(icstatus_list.begin());
+            icstatus_list.clear();
             pthread_mutex_unlock(&icstatus_list_mutex_);
             
             int status = buf[4];
@@ -705,10 +720,9 @@ int smartwin_devices::ic_card_power_off(uint8_t card_type, uint8_t card_seat) {
     return ret;
 }
 
-int smartwin_devices::ic_card_send_apdu_command(uint8_t card_type, uint8_t card_seat, 
-                    std::vector<uint8_t> apdu_command, std::vector<uint8_t> card_return_data) {
+int smartwin_devices::ic_card_send_apdu_command(uint8_t card_seat, 
+                    std::vector<uint8_t> apdu_command, std::vector<uint8_t>& card_return_data) {
     std::vector<uint8_t> tmp;
-    tmp.push_back(card_type);
     tmp.push_back(card_seat);
 
     tmp.push_back((uint8_t)((apdu_command.size()>>8)&0xFF));
@@ -765,7 +779,7 @@ int smartwin_devices::icc_search_card_activation(uint8_t card_type, uint8_t &car
     return ret;
 }
 
-int smartwin_devices::icc_send_apdu_command(std::vector<uint8_t> apdu_command, std::vector<uint8_t> card_return_data) {
+int smartwin_devices::icc_send_apdu_command(std::vector<uint8_t> apdu_command, std::vector<uint8_t>& card_return_data) {
     std::vector<uint8_t> tmp;
     tmp.push_back((uint8_t)((apdu_command.size()>>8)&0xFF));
     tmp.push_back((uint8_t)(apdu_command.size()&0xFF));
@@ -838,20 +852,20 @@ int smartwin_devices::search_card_start(uint8_t search_mode, uint32_t timeout_ms
     tmp.push_back((uint8_t)(timeout_ms&0xFF));
     send_request_cmd(CMD_SEARCH_CARD_START, tmp);
 
-    std::vector<uint8_t> buf;
-    int ret = recv_from_list(CMD_SEARCH_CARD_START, buf);
+    // std::vector<uint8_t> buf;
+    // int ret = recv_from_list(CMD_SEARCH_CARD_START, buf);
     
-    return ret;
+    return SDK_OK;
 }
 
 int smartwin_devices::search_card_get_status(uint8_t &type, uint8_t &key) {
     int ret = SDK_OK;
 
     if(search_card_list.size() > 0) {
-        std::vector<uint8_t> buf = search_card_list[0];
+        std::vector<uint8_t> buf = search_card_list[search_card_list.size() - 1];
 
         pthread_mutex_lock(&search_card_list_mutex_);
-        search_card_list.erase(search_card_list.begin());
+        search_card_list.clear();
         pthread_mutex_unlock(&search_card_list_mutex_);
 
         int ln = buf[2] * 256 + buf[3];
@@ -862,7 +876,7 @@ int smartwin_devices::search_card_get_status(uint8_t &type, uint8_t &key) {
             code = (code<<8) + buf[7];
 
             type = buf[8];
-            if((type & 0x01) == 0x01 && ln >= 9) {
+            if((type & 0x01) == 0x01 && ln >= 6) {
                 key = buf[9];
             }
 

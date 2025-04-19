@@ -35,7 +35,6 @@ add_library(smartwin_devices SHARED
     ${PROJECT_SOURCE_DIR}/src/smartwin_devices.cpp
     ${PROJECT_SOURCE_DIR}/src/smartwin_comm.cpp
     ${PROJECT_SOURCE_DIR}/src/serial/serial.cpp
-    ${PROJECT_SOURCE_DIR}/src/serial/list_ports_linux.cpp
     ${PROJECT_SOURCE_DIR}/src/serial/unix.cpp
 )
 
